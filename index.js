@@ -1,96 +1,204 @@
-const mysql = require("inquirer");
+const inquirer = require("inquirer");
 const mysql = require("mysql");
 
 const connection = mysql.createConnection({
   host: "localhost",
   port: 3306,
   user: "root",
-  password: "root",
+  password: "Adhikari95",
   database: "employeemanagementDB",
 });
 
-connection.connect((err) => {
+connection.connect(function (err) {
   if (err) throw err;
-  askQuestions();
+  console.log("connected as id " + connection.threadId + "\n");
+  start();
 });
 
-// present to the user in the terminal
-const askQuestions = () => {
-  inquirer
-    .prompt({
-      name: "list",
-      type: "task",
-      message: "What would you like to do?",
+function start() {
+  inquirer.prompt({
+      message: "what would you like to view?",
+      type: "list",
       choices: [
-        "View all employee",
-        "View employees by department",
-        "Add employee",
-        "Remove Employee",
-        "Update employee role",
-        "Add role",
-        "End"]
-    })
+          "view all departments",
+          "add employee",
+          "add role",
+          "update employee role",
+          "End"
+      ],
+      name: "choice"
+  }).then(answers => {
+      console.log(answers.choice);
+      switch (answers.choice) {
+          case "view all departments":
+              viewDepartments()
+              break;
 
-    .then((answer) => {
-        //we need to build functionality based on user choice
-        switch (answer.action) {
-          case "View all employee":
-            viewEmployee();
-            break;
+          case "add employee":
+              addEmployee()
+              break;
 
-          case "View employee by department":
-            employeeByDepartment();
-            break;
+          case "add department":
+              addDepartment()
+              break;
 
-          case "Add employee":
-            addEmployee();
-            break;
+          case "add role":
+              addRole()
+              break;
 
-          case "Remove Employee":
-            removeEmployee();
-            break;
+          case "update employee role":
+              updateEmployeeRole();
+              break;
 
-          case "Update employee role":
-            updateEmployeeRole();
-            break;
-
-          case "Add role":
-            addRole();
-            break;
-
-            default:
-            connection.end()
-            break;
-        }
-      });
-  };
-
-const viewEmployee = () => {
-    return `SELECT e.id, e.first-name, e.last_name, r.title AS department, r.salary, CONCAT(m.first_name, ' ', m.last_name) AS Manager
-    FROM employee e
-        LEFT JOIN employee m ON m.id = e.manager_id
-        LEFT JOIN Role r ON e.role_id = r.id
-        LEFT JOIN Department d ON d.id = r.department_id
-    ORDER BY e.id ASC;`;
-};
+          default:
+              connection.end()
+              break;
+      }
+  })
+}
 
 
+function viewDepartments() {
+  connection.query("SELECT * FROM department", function (err, data) {
+      console.table(data);
+      start();
+  })
+}
+
+function addEmployee() {
+  inquirer.prompt([{
+          type: "input",
+          name: "firstName",
+          message: "What is the first name of the employees?"
+      },
+      {
+          type: "input",
+          name: "lastName",
+          message: "What is the first name of the employees?"
+      },
+      {
+          type: "number",
+          name: "roleId",
+          message: "What is the role ID of the employees?"
+      },
+      {
+          type: "number",
+          name: "managerId",
+          message: "What is the employees manager's ID?"
+      }
+  ]).then(function(res) {
+      connection.query('INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)', [res.firstName, res.lastName, res.roleId, res.managerId], function(err, data) {
+          if (err) throw err;
+          console.table("Successfully Inserted");
+          start();
+      })
+  })
+}
+
+function addDepartment() {
+  inquirer.prompt([{
+      type: "input",
+      name: "department",
+      message: "What is the department that you want to add?"
+  }, ]).then(function(res) {
+      connection.query('INSERT INTO department (name) VALUES (?)', [res.department], function(err, data) {
+          if (err) throw err;
+          console.table("Successfully Inserted");
+          start();
+      })
+  })
+}
+
+function addRole() {
+  inquirer.prompt([
+      {
+          message: "Please enter role title:",
+          type: "input",
+          name: "title"
+      }, {
+          message: "Please enter the salary:",
+          type: "number",
+          name: "salary"
+      }, {
+          message: "Please enter department ID:",
+          type: "number",
+          name: "department_id"
+      }
+  ]).then(function (response) {
+    console.log("Adding new role")
+      connection.query("INSERT INTO role (title, salary, department_id) values (?, ?, ?)", 
+      [response.title, response.salary, response.department_id], function (err, data) {
+          console.table(data);
+      })
+      start();
+  })
+
+}
+
+function updateEmployeeRole() {
+  inquirer.prompt([
+      {
+          message: "which employee would you like to update?",
+          type: "input",
+          name: "name"
+      }, {
+          message: "Please enter the new role ID:",
+          type: "number",
+          name: "role_id"
+      }
+  ]).then(function (response) {
+      connection.query("UPDATE employee SET role_id = ? WHERE first_name = ?", [response.role_id, response.name], function (err, data) {
+          console.table(data);
+      })
+      start();
+  })
+
+}
+
+
+
+// const viewDepartment = () => {
+//   inquirer.prompt(
+//     {
+//       type: "list",
+//       message: "What would you like to do?",
+//       choices: [
+//         "View all Department",
+//         "Add Department",
+//         "Remove Department",
+//         "End",
+//         "Go BACK" ],
+//       name: "departmentChoices"
     
-    
-    
-    
-    // connection.query(query, ("SELECT * FROM employee",  )
-   
-    //   .then((answer) => {
-    //     //use convenience variable
-    //     // const query = "SELECT position, song, year FROM top5000 WHERE ?";
-    //     connection.query(query, { artist: answer.artist }, (err, res) => {
-    //       res.forEach(({ position, song, year }) => {
-    //         console.log(
-          
+//     }).then(Chooses => {
+//       //we need to build functionality based on user choice
+//       switch (choice.departmentChoices) {
+//         case "View all Departments":
+//           rDepartments();
+//           break;
 
+//         case "Add Department":
+//           addDepartment();
+//           break;
 
-// function viewEmployee() {
-//     console.log("View all employee\n");
+//         case "Remove Department":
+//           removeDepartment();
+//           break;
+
+//         case "End":
+//           connection.end()
+//           break;
+    
+//           default:
+//           askQuestions()
+//       }
+//     });
 
 // }
+
+
+
+
+
+
+
