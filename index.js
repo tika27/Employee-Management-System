@@ -74,7 +74,7 @@ function addEmployee() {
       {
           type: "input",
           name: "lastName",
-          message: "What is the first name of the employees?"
+          message: "What is the last name of the employees?"
       },
       {
           type: "number",
@@ -112,7 +112,7 @@ function addDepartment() {
 function addRole() {
   inquirer.prompt([
       {
-          message: "Please enter role title:",
+          message: "Please enter the title role:",
           type: "input",
           name: "title"
       }, {
