@@ -18,3 +18,6 @@ JS, Node.js and MySql
 # Questions
 
 If you have any questions regarding my project please contact me at tika27@github.io
+
+walk through video
+https://drive.google.com/file/d/1vjyawT59kD0r0fyebdso2wiD2lmL3aMd/view?usp=sharing
